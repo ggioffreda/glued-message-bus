@@ -1,0 +1,36 @@
+{
+  "name": "glued-message-bus",
+  "version": "0.1.0",
+  "description": "Simple message bus implementation over AMQP.",
+  "main": "index.js",
+  "dependencies": {
+    "amqplib": "^0.4.2"
+  },
+  "devDependencies": {
+    "mocha": "^3.0.1",
+    "sinon": "^1.17.5",
+    "supertest": "^2.0.0"
+  },
+  "scripts": {
+    "test": "node node_modules/.bin/mocha --recursive test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ggioffreda/glued-message-bus.git"
+  },
+  "keywords": [
+    "glued",
+    "gluedjs",
+    "glued-js",
+    "message",
+    "bus",
+    "amqp",
+    "rabbitmq"
+  ],
+  "author": "Giovanni Gioffreda <giovanni.gioffreda@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ggioffreda/glued-message-bus/issues"
+  },
+  "homepage": "https://github.com/ggioffreda/glued-message-bus#readme"
+}
