@@ -1,6 +1,6 @@
 {
   "name": "glued-message-bus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple message bus implementation over AMQP.",
   "main": "index.js",
   "dependencies": {
@@ -25,7 +25,9 @@
     "message",
     "bus",
     "amqp",
-    "rabbitmq"
+    "rabbitmq",
+    "publish",
+    "subscribe"
   ],
   "author": "Giovanni Gioffreda <giovanni.gioffreda@gmail.com>",
   "license": "ISC",
