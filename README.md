@@ -76,7 +76,11 @@ API
   - key: the topic identifier;
   - msg: the message received;
   - callback: a callback that must be called once done. This is really important
-    to make sure messages don't get stuck.
+    to make sure messages don't get stuck;
+
+- **getMessageBus**(): returns the instance of the message bus;
+
+- **getChannel**(): returns the underlying AMQP channel.
 
 Test
 ----
