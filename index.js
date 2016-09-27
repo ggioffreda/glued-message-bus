@@ -135,7 +135,8 @@ function MessageBusChannel(messageBus, channel) {
       const confirmedQueue = q.queue;
       self._channel.bindQueue(confirmedQueue, self.getMessageBus().getExchange(), key);
       self._channel.consume(confirmedQueue, function (msg) {
-        consumer(msg.fields.routingKey, msg.content, function () {
+        const routingKey = msg.fields && msg.fields.routingKey ? msg.fields.routingKey : null;
+        consumer(routingKey, msg.content, function () {
           self._channel.ack(msg);
         });
       });
