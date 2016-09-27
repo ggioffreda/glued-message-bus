@@ -1,6 +1,6 @@
 {
   "name": "glued-message-bus",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Simple message bus implementation over AMQP.",
   "main": "index.js",
   "dependencies": {
