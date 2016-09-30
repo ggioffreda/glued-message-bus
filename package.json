@@ -19,9 +19,8 @@
     "url": "git+https://github.com/ggioffreda/glued-message-bus.git"
   },
   "keywords": [
+    "glue",
     "glued",
-    "gluedjs",
-    "glued-js",
     "message",
     "bus",
     "amqp",

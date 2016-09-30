@@ -1,4 +1,4 @@
-GluedJS - Message Bus
+Glue - Message Bus
 =====================
 
 Very simple implementation of a message bus over AMQP. This is perfect for 
