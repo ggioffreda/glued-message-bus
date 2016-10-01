@@ -59,6 +59,11 @@ function MessageBusChannel (messageBus, channel) {
       self._channel.bindQueue(confirmedQueue, self.getMessageBus().getExchange(), key);
       self._channel.consume(confirmedQueue, function (msg) {
         const routingKey = msg.fields && msg.fields.routingKey ? msg.fields.routingKey : null;
+        if (routingKey === null) {
+          // this message is not supposed to be here, this is a topic-based implementation of the pub-sub pattern
+          self._channel.ack(msg);
+          return;
+        }
         consumer(routingKey, msg.content, function () {
           self._channel.ack(msg);
         });
