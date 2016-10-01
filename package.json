@@ -1,7 +1,7 @@
 {
   "name": "glued-message-bus",
   "version": "0.2.0",
-  "description": "Simple message bus implementation over AMQP.",
+  "description": "Publish-subscribe topic based pattern and RPC over AMQP",
   "main": "index.js",
   "dependencies": {
     "amqplib": "^0.4.2",
