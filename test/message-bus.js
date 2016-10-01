@@ -239,7 +239,7 @@ describe('MessageBusRpc', function () {
   describe('#accept()', function () {
     var consumer = null;
 
-    before(function () {
+    before(function (done) {
       context = initialiser.initialiseContext();
       context.messageBus.connectModule(function (err, ch) {
         channel = ch;
@@ -288,7 +288,7 @@ describe('MessageBusRpc', function () {
     var replier = null;
     var handler = sinon.stub();
 
-    before(function () {
+    before(function (done) {
       context = initialiser.initialiseContext();
       context.amqpChannel.assertQueue.callsArgWith(2, null, { queue: 'xyz' });
       context.messageBus.connectModule(function (err, ch) {
