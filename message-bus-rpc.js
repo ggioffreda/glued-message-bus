@@ -34,7 +34,7 @@ function MessageBusRpc (messageBusChannel, options) {
       }
 
       caller.send(queue, message, handler)
-    })
+    }, raw)
   }
 
   this.getPrivateQueue = function () {
@@ -80,10 +80,19 @@ function MessageBusRpc (messageBusChannel, options) {
 
     // and when you get one, fetch the correct tracker and send the response back to the caller
     const tracker = trackers[msg.properties.correlationId]
-    tracker.handler(null, msg.content)
+    var message = msg.content
+    if (!tracker.raw) {
+      try {
+        message = new Buffer(JSON.stringify(msg.content))
+      } catch (e) {
+        return
+      }
+    }
+
+    tracker.handler(null, message)
   }
 
-  function doCall (attempt, callback) {
+  function doCall (attempt, callback, raw) {
     if (attempt > options.maxAttempts) {
       callback(new Error('Every RPC attempt timed out after ' + options.callTimeout + 'ms, ' + options.maxAttempts + ' attempts made'))
       return
@@ -98,7 +107,7 @@ function MessageBusRpc (messageBusChannel, options) {
         var channelOverride = setTimeout(function () {
           clearInterval(channelChecker)
           self._privateQueue = null
-          doCall(attempt + 1, callback)
+          doCall(attempt + 1, callback, raw)
         }, options.callTimeout + Math.floor(600 * Math.random()) - 300)
 
         // constantly try and check if ready
@@ -130,7 +139,7 @@ function MessageBusRpc (messageBusChannel, options) {
 
       // set the private queue as ready
       self._privateQueue.send = function (queue, message, handler) {
-        const tracker = createTracker(handler)
+        const tracker = createTracker(handler, raw)
         ch.sendToQueue(queue, message, { correlationId: tracker.id, replyTo: q.queue })
       }
       self._privateQueue.ready = true
@@ -141,12 +150,12 @@ function MessageBusRpc (messageBusChannel, options) {
     })
   }
 
-  function createTracker (handler) {
+  function createTracker (handler, raw) {
     const id = uuid.v4()
     if (trackers[id]) {
       return createTracker()
     }
-    trackers[id] = { id: id, handler: handler }
+    trackers[id] = { id: id, handler: handler, raw: raw }
     return trackers[id]
   }
 }

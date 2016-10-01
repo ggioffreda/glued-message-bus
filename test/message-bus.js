@@ -336,7 +336,7 @@ describe('MessageBusRpc', function () {
       rpc._replyConsumer({ content: 'Test content', properties: { correlationId: correlationId } })
       assert.ok(handler.calledOnce)
       assert.equal(handler.lastCall.args[0], null)
-      assert.equal(handler.lastCall.args[1], 'Test content')
+      assert.equal(handler.lastCall.args[1].toString(), '"Test content"')
     })
   })
 })
