@@ -217,7 +217,7 @@ describe('MessageBusChannel', function () {
     });
 
     it('should publish the given message', function () {
-      assert.equal(message, context.amqpChannel.publish.args[ 0 ][ 2 ]);
+      assert.equal(context.amqpChannel.publish.args[ 0 ][ 2 ].toString(), JSON.stringify(message));
     });
 
     it('should publish persistent messages', function () {
