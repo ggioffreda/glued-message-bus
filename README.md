@@ -20,12 +20,12 @@ connected modules can publish messages and subscribe to particular topics.
 Connecting modules to the message bus:
 
 ```javascript
-const MessageBus = require('glued-message-bus').MessageBus;
-var mb = new MessageBus('amqp://localhost');
+const MessageBus = require('glued-message-bus').MessageBus
+var mb = new MessageBus('amqp://localhost')
 
 mb.connectModule(function(channel) {
   // now you can use the channel for publishing and subscribing
-});
+})
 ```
 
 ### Pub-Sub
@@ -41,10 +41,10 @@ get stuck on it until the subscriber closes the communication channel.
 mb.subscribe('my.awesome.topic', function (key, message, callback) {
   // will receive 'Yo!' and any other message sent to 'my.awesome.topic'
   // do some stuff ...
-  callback();
-});
+  callback()
+})
 
-mb.publish('my.awesome.topic', 'Yo!');
+mb.publish('my.awesome.topic', 'Yo!')
 ```
 
 ### RPC
@@ -57,14 +57,12 @@ const rpc = mb.getRpc()
 
 rpc.accept('my_rpc', function (request, replier) {
   // check the request and decide what to return
-
   // it's really important that you send the response back
   replier('response')
 })
 
 rpc.call('my_rpc', 'compute 100 primes', function (err, response) {
   if (err) throw err
-
   // do something with the response
 })
 ```
