@@ -55,17 +55,17 @@ function MessageBusRpc (messageBusChannel, options) {
   };
 
   this._replyConsumer = function (msg) {
-    if (!msg.properties.correlationId || !trackers[msg.properties.correlationId]) {
+    if (!msg.properties.correlationId || !trackers[ msg.properties.correlationId ]) {
       // this message shouldn't be here, it has no correlation ID or the tracker is missing/gone, return
       return;
     }
 
     // and when you get one, fetch the correct tracker and send the response back to the caller
-    const tracker = trackers[msg.properties.correlationId];
+    const tracker = trackers[ msg.properties.correlationId ];
     tracker.handler(null, msg.content);
   };
 
-  function doCall(attempt, callback) {
+  function doCall (attempt, callback) {
     if (attempt > options.maxAttempts) {
       callback(new Error('Every RPC attempt timed out after ' + options.callTimeout + 'ms, ' + options.maxAttempts + ' attempts made'));
       return;
@@ -123,13 +123,13 @@ function MessageBusRpc (messageBusChannel, options) {
     });
   }
 
-  function createTracker(handler) {
+  function createTracker (handler) {
     const id = uuid.v4();
-    if (trackers[id]) {
+    if (trackers[ id ]) {
       return createTracker();
     }
-    trackers[id] = { id: id, handler: handler };
-    return trackers[id];
+    trackers[ id ] = { id: id, handler: handler };
+    return trackers[ id ];
   }
 
 }

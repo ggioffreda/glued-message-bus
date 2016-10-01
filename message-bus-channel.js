@@ -1,6 +1,6 @@
 const MessageBusRpc = require('./message-bus-rpc');
 
-function MessageBusChannel(messageBus, channel) {
+function MessageBusChannel (messageBus, channel) {
 
   /**
    * The message bus
@@ -54,7 +54,7 @@ function MessageBusChannel(messageBus, channel) {
     queue = queue || '';
 
     this._channel.prefetch(1);
-    this._channel.assertQueue(queue, options).then(function(q) {
+    this._channel.assertQueue(queue, options).then(function (q) {
       const confirmedQueue = q.queue;
       self._channel.bindQueue(confirmedQueue, self.getMessageBus().getExchange(), key);
       self._channel.consume(confirmedQueue, function (msg) {

@@ -1,7 +1,7 @@
 const MessageBusErrors = require('./message-bus-errors');
 const MessageBusChannel = require('./message-bus-channel');
 
-function MessageBus(server, exchange, amqp) {
+function MessageBus (server, exchange, amqp) {
   amqp = amqp || require('amqplib');
 
   /**
