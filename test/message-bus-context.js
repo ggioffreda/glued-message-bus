@@ -9,7 +9,13 @@ function initialiseContext(failedConnection, failedChannel, failedChannelMethod)
                 if (failedChannelMethod) reject(defaultError);
                 else resolve({});
             })),
-            publish: sinon.stub()
+            assertQueue: sinon.stub(),
+            prefetch: sinon.stub(),
+            publish: sinon.stub(),
+            bindQueue: sinon.stub(),
+            sendToQueue: sinon.stub(),
+            consume: sinon.stub(),
+            ack: sinon.stub()
         },
         amqpConnection = {
             createChannel: sinon.stub().returns(new Promise(function (resolve, reject) {

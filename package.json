@@ -4,7 +4,8 @@
   "description": "Simple message bus implementation over AMQP.",
   "main": "index.js",
   "dependencies": {
-    "amqplib": "^0.4.2"
+    "amqplib": "^0.4.2",
+    "node-uuid": "^1.4.7"
   },
   "devDependencies": {
     "mocha": "^3.0.1",

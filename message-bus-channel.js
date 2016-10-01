@@ -1,3 +1,5 @@
+const MessageBusRpc = require('./message-bus-rpc');
+
 function MessageBusChannel(messageBus, channel) {
 
   /**
@@ -11,10 +13,18 @@ function MessageBusChannel(messageBus, channel) {
   /**
    * The channel
    *
-   * @type amqplib.Channel
+   * @type {amqplib.Channel}
    * @access private
    */
   this._channel = channel;
+
+  /**
+   * The RPC utility
+   *
+   * @type {MessageBusRpc}
+   * @private
+   */
+  this._rpc = new MessageBusRpc(this);
 
   /**
    * Publish a message on the message bus
@@ -64,6 +74,10 @@ function MessageBusChannel(messageBus, channel) {
 
   this.getChannel = function () {
     return this._channel;
+  };
+
+  this.getRpc = function () {
+    return this._rpc;
   };
 }
 

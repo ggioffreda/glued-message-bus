@@ -183,6 +183,19 @@ describe('MessageBusChannel', function () {
         });
     });
 
+    describe('#getRpc()', function () {
+        it('should return a message bus RPC object', function () {
+            assert.ok(channel.getRpc());
+            assert.ok(channel.getRpc().call);
+            assert.ok(channel.getRpc().accept);
+        });
+
+        it('should always return the very same object', function () {
+            const got = channel.getRpc();
+            assert.strictEqual(channel.getRpc(), got);
+        });
+    });
+
     describe('#publish()', function () {
         const key = 'test.key',
             message = 'test message';
@@ -216,4 +229,106 @@ describe('MessageBusChannel', function () {
             assert.equal('application/json', context.amqpChannel.publish.args[0][3].content_type);
         });
     });
+});
+
+describe('MessageBusRpc', function () {
+  var context = null;
+  var channel = null;
+  var rpc = null;
+  const queue = 'test_rpc';
+
+  describe('#accept()', function () {
+    var consumer = null;
+
+    before(function () {
+      context = initialiser.initialiseContext();
+      context.messageBus.connectModule(function (err, ch) {
+        channel = ch;
+        rpc = channel.getRpc();
+        consumer = sinon.stub();
+        consumer.callsArgWith(1, 'yo');
+        rpc.accept(queue, consumer);
+        done();
+      });
+    });
+
+    it('should set up the non durable queue', function () {
+      assert.equal(context.amqpChannel.assertQueue.lastCall.args[0], queue);
+      assert.equal(context.amqpChannel.assertQueue.lastCall.args[1].durable, false);
+    });
+
+    it('should set up prefetch to 1', function () {
+      assert.equal(context.amqpChannel.prefetch.lastCall.args[0], 1);
+    });
+
+    it('should set up to consume the queue', function () {
+      assert.equal(context.amqpChannel.consume.lastCall.args[0], queue);
+    });
+
+    it('should ack the message if replyTo or correlationId are missing without calling the consumer', function () {
+      rpc._callConsumer(context.amqpChannel, consumer, { properties: {} });
+      rpc._callConsumer(context.amqpChannel, consumer, { properties: { replyTo: 'x' } });
+      rpc._callConsumer(context.amqpChannel, consumer, { properties: { correlationId: 'y' } });
+      assert.ok(!consumer.called);
+      assert.ok(context.amqpChannel.ack.calledThrice);
+    });
+
+    it('should call the consumer if replyTo and correlationId are present', function () {
+      rpc._callConsumer(context.amqpChannel, consumer, { properties: { replyTo: 'x', correlationId: 'y' }, content: 'z' });
+      assert.ok(consumer.calledOnce);
+      assert.equal(context.amqpChannel.ack.callCount, 4);
+      assert.equal(consumer.lastCall.args[0], 'z');
+      assert.ok(context.amqpChannel.sendToQueue.calledOnce);
+    });
+  });
+
+  describe('#call()', function () {
+    var replier = null;
+    var handler = sinon.stub();
+
+    before(function () {
+      context = initialiser.initialiseContext();
+      context.amqpChannel.assertQueue.callsArgWith(2, null, { queue: 'xyz' });
+      context.messageBus.connectModule(function (err, ch) {
+        channel = ch;
+        rpc = channel.getRpc();
+        done();
+      });
+    });
+
+    it('should create a new private channel', function () {
+      rpc.call(queue, 'test', handler);
+      assert.ok(context.amqpChannel.assertQueue.calledOnce);
+      assert.equal(context.amqpChannel.assertQueue.lastCall.args[0], '');
+      assert.deepEqual(context.amqpChannel.assertQueue.lastCall.args[1], { exclusive: true, durable: false });
+    });
+
+    it('and use the same private channel for subsequent calls', function () {
+      var privateQueue = rpc.getPrivateQueue();
+      rpc.call(queue, 'second test', handler);
+      assert.strictEqual(rpc.getPrivateQueue(), privateQueue);
+    });
+
+    it('should set up a consumer for the responses', function () {
+      rpc.call(queue, 'third test', handler);
+      assert.equal(context.amqpChannel.consume.lastCall.args[0], rpc.getPrivateQueue().queue);
+      assert.deepEqual(context.amqpChannel.consume.lastCall.args[2], { noAck: true });
+      replier = context.amqpChannel.consume.lastCall.args[1];
+    });
+
+    it('should send the message to the queue', function () {
+      rpc.call(queue, 'fourth test', handler);
+      assert.equal(context.amqpChannel.sendToQueue.lastCall.args[0], queue);
+      assert.equal(context.amqpChannel.sendToQueue.lastCall.args[1], 'fourth test');
+    });
+
+    it('should send the reply to the private channel', function () {
+      var trackers = rpc.getTrackers();
+      var correlationId = Object.keys(trackers).pop();
+      rpc._replyConsumer({ content: 'Test content', properties: { correlationId: correlationId }});
+      assert.ok(handler.calledOnce);
+      assert.equal(handler.lastCall.args[0], null);
+      assert.equal(handler.lastCall.args[1], 'Test content');
+    });
+  });
 });
