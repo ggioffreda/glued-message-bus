@@ -282,7 +282,7 @@ describe('MessageBusRpc', function () {
     it('should call the consumer if replyTo and correlationId are present', function () {
       rpc._callConsumer(context.amqpChannel, consumer, {
         properties: { replyTo: 'x', correlationId: 'y' },
-        content: 'z'
+        content: '"z"'
       })
       assert.ok(consumer.calledOnce)
       assert.equal(context.amqpChannel.ack.callCount, 4)
@@ -327,11 +327,11 @@ describe('MessageBusRpc', function () {
     it('should send the message to the queue', function () {
       rpc.call(queue, 'fourth test', handler)
       assert.equal(context.amqpChannel.sendToQueue.lastCall.args[0], queue)
-      assert.equal(context.amqpChannel.sendToQueue.lastCall.args[1], 'fourth test')
+      assert.equal(context.amqpChannel.sendToQueue.lastCall.args[1].toString(), '"fourth test"')
     })
 
     it('should send the reply to the private channel', function () {
-      var trackers = rpc.getTrackers()
+      var trackers = rpc._getTrackers()
       var correlationId = Object.keys(trackers).pop()
       rpc._replyConsumer({ content: 'Test content', properties: { correlationId: correlationId } })
       assert.ok(handler.calledOnce)

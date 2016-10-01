@@ -10,21 +10,27 @@ function MessageBusRpc (messageBusChannel, options) {
 
   this._privateQueue = null
 
-  this.accept = function (queue, consumer) {
+  this.accept = function (queue, consumer, raw) {
+    raw = raw || false
     const ch = messageBusChannel.getChannel()
 
     ch.assertQueue(queue, { durable: false })
     ch.prefetch(1)
     ch.consume(queue, function (msg) {
-      self._callConsumer(ch, consumer, msg)
+      self._callConsumer(ch, consumer, msg, raw)
     })
   }
 
-  this.call = function (queue, message, handler) {
+  this.call = function (queue, message, handler, raw) {
+    raw = raw || false
     doCall(1, function (err, caller) {
       if (err) {
         handler(err)
         return
+      }
+
+      if (!raw) {
+        message = new Buffer(JSON.stringify(message))
       }
 
       caller.send(queue, message, handler)
@@ -35,21 +41,33 @@ function MessageBusRpc (messageBusChannel, options) {
     return self._privateQueue
   }
 
-  this.getTrackers = function () {
+  // Internal utilities. This is not part of the public API and will change with no notice, use at your own risk
+
+  this._getTrackers = function () {
     return trackers
   }
 
-  // Internal utilities. This is not part of the public API and will change with no notice, use at your own risk
-
-  this._callConsumer = function (ch, consumer, msg) {
+  this._callConsumer = function (ch, consumer, msg, raw) {
     if (!msg.properties.replyTo || !msg.properties.correlationId) {
       // this message shouldn't be here, it has no reply to queue and/or correlation ID, reject it and return
       ch.ack(msg)
       return
     }
 
-    consumer(msg.content, function (reply) {
-      ch.sendToQueue(msg.properties.replyTo, reply, { correlationId: msg.properties.correlationId })
+    var message = msg.content
+    if (!raw) {
+      try {
+        message = JSON.parse(msg.content.toString())
+      } catch (e) {
+        // the message does not contain valid JSON data, reject it and return
+        ch.ack(msg)
+      }
+    }
+
+    consumer(message, function (reply, raw) {
+      raw = raw || false
+      var message = raw ? reply : new Buffer(JSON.stringify(reply))
+      ch.sendToQueue(msg.properties.replyTo, message, { correlationId: msg.properties.correlationId })
       ch.ack(msg)
     })
   }
