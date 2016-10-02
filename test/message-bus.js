@@ -333,10 +333,10 @@ describe('MessageBusRpc', function () {
     it('should send the reply to the private channel', function () {
       var trackers = rpc._getTrackers()
       var correlationId = Object.keys(trackers).pop()
-      rpc._replyConsumer({ content: 'Test content', properties: { correlationId: correlationId } })
+      rpc._replyConsumer({ content: '"Test content"', properties: { correlationId: correlationId } })
       assert.ok(handler.calledOnce)
       assert.equal(handler.lastCall.args[0], null)
-      assert.equal(handler.lastCall.args[1].toString(), '"Test content"')
+      assert.equal(handler.lastCall.args[1], 'Test content')
     })
   })
 })
