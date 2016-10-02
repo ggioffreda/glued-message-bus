@@ -90,13 +90,15 @@ API
 
 ### MessageBusChannel
 
-- **publish**(key, message): publishes a message to the topic identified by the
-  given key;
+- **publish**(key, message, raw): publishes a message to the topic identified by the
+  given key, if the last parameter is true than the message will be sent as is to
+  the bus;
 
-- **subscribe**(key, consumer, queue): subscribes to the given topic so that each
-  message received on that topic will be passed to the given consumer. If no
-  queue is specified a new private one will be created. The consumer will receive
-  three parameters when a message is received:
+- **subscribe**(key, consumer, queue, raw, options): subscribes to the given topic 
+  so that each message received on that topic will be passed to the given consumer. 
+  If no queue is specified a new private one will be created. If the parameter raw
+  is set to true, received messages will be passed as is to the consumer. The 
+  consumer will receive three parameters when a message is received:
   - key: the topic identifier;
   - msg: the message received;
   - callback: a callback that must be called once done. This is really important
@@ -110,11 +112,14 @@ API
 
 ### MessageBusRpc
 
-- **accept**(queue, consumer): accepts calls on the specified queue, through the
-  given consumer;
+- **accept**(queue, consumer, raw): accepts calls on the specified queue, through
+  the given consumer and if the raw parameter is true messages will not be parsed
+  or wrapped but will be let through as is;
 
-- **call**(queue, message, handler): sends the message to the RPC server
-  listening on that queue and handles the response through the given handler;
+- **call**(queue, message, handler, raw): sends the message to the RPC server
+  listening on that queue and handles the response through the given handler. If
+  the parameter "raw" is true then messages will be let through as is without
+  being JSON parsed or serialised;
 
 - **getPrivateQueue**(): return the internal private queue created for the
   callers, it's an object with the following properties:
