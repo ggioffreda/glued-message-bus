@@ -40,7 +40,7 @@ function MessageBusChannel (messageBus, channel) {
       this._messageBus.getExchange(),
       key,
       raw ? message : new Buffer(JSON.stringify(message)),
-      { persistent: true, content_type: 'application/json' }
+      raw ? {} : { persistent: true, content_type: 'application/json' }
     )
   }
 
@@ -53,10 +53,11 @@ function MessageBusChannel (messageBus, channel) {
    * @param consumer
    * @param queue
    * @param raw
+   * @param options
    */
-  this.subscribe = function (key, consumer, queue, raw) {
+  this.subscribe = function (key, consumer, queue, raw, options) {
     raw = raw || false
-    var options = queue ? { durable: true } : { exclusive: true }
+    options = initialiseSubscriptionOptions(options)
     var self = this
     queue = queue || ''
 
@@ -101,6 +102,28 @@ function MessageBusChannel (messageBus, channel) {
 
   this.getRpc = function () {
     return this._rpc
+  }
+
+  // Internal stuff
+
+  function initialiseSubscriptionOptions (options) {
+    options = options || {}
+    if (queue) {
+      if (!options.hasOwnProperty('durable')) {
+        options.durable = true
+      }
+      if (!options.hasOwnProperty('autoDelete') && options.durable) {
+        options.autoDelete = false
+      }
+    } else {
+      if (!options.hasOwnProperty('exclusive')) {
+        options.exclusive = true
+      }
+      if (!options.hasOwnProperty('autoDelete') && options.exclusive) {
+        options.autoDelete = true
+      }
+    }
+    return options
   }
 }
 
