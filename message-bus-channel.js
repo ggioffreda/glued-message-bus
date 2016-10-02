@@ -57,7 +57,7 @@ function MessageBusChannel (messageBus, channel) {
    */
   this.subscribe = function (key, consumer, queue, raw, options) {
     raw = raw || false
-    options = initialiseSubscriptionOptions(options)
+    options = initialiseSubscriptionOptions(queue, options)
     var self = this
     queue = queue || ''
 
@@ -106,7 +106,7 @@ function MessageBusChannel (messageBus, channel) {
 
   // Internal stuff
 
-  function initialiseSubscriptionOptions (options) {
+  function initialiseSubscriptionOptions (queue, options) {
     options = options || {}
     if (queue) {
       if (!options.hasOwnProperty('durable')) {
