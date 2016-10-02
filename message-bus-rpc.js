@@ -83,7 +83,7 @@ function MessageBusRpc (messageBusChannel, options) {
     var message = msg.content
     if (!tracker.raw) {
       try {
-        message = new Buffer(JSON.stringify(msg.content))
+        message = JSON.parse(msg.content.toString())
       } catch (e) {
         return
       }
