@@ -38,7 +38,7 @@ job is done otherwise the message will linger in the queue and the queue will
 get stuck on it until the subscriber closes the communication channel.
 
 ```javascript
-mb.subscribe('my.awesome.topic', function (key, message, callback) {
+mb.subscribe('my.awesome.topic', function (key, message, rawMessage, callback) {
   // will receive 'Yo!' and any other message sent to 'my.awesome.topic'
   // do some stuff ...
   callback()
@@ -55,13 +55,13 @@ RPC is very easy through this library, you only need to call *accept* from your
 ```javascript
 const rpc = mb.getRpc()
 
-rpc.accept('my_rpc', function (request, replier) {
+rpc.accept('my_rpc', function (request, rawRequest, replier) {
   // check the request and decide what to return
   // it's really important that you send the response back
   replier('response')
 })
 
-rpc.call('my_rpc', 'compute 100 primes', function (err, response) {
+rpc.call('my_rpc', 'compute 100 primes', function (err, response, rawResponse) {
   if (err) throw err
   // do something with the response
 })
