@@ -10,11 +10,12 @@ function MessageBusRpc (messageBusChannel, options) {
 
   this._privateQueue = null
 
-  this.accept = function (queue, consumer, raw) {
+  this.accept = function (queue, consumer, raw, options) {
     raw = raw || false
+    options = options || { durable: false }
     const ch = messageBusChannel.getChannel()
 
-    ch.assertQueue(queue, { durable: false })
+    ch.assertQueue(queue, options)
     ch.prefetch(1)
     ch.consume(queue, function (msg) {
       self._callConsumer(ch, consumer, msg, raw)
