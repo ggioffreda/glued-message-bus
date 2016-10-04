@@ -22,8 +22,9 @@ function MessageBusRpc (messageBusChannel, options) {
     })
   }
 
-  this.request = function (queue, message, handler, raw) {
+  this.request = function (queue, message, handler, raw, options) {
     raw = raw || false
+    options = options || {}
     doCall(1, function (err, caller) {
       if (err) {
         handler(err)
@@ -34,7 +35,7 @@ function MessageBusRpc (messageBusChannel, options) {
         message = new Buffer(JSON.stringify(message))
       }
 
-      caller.send(queue, message, handler)
+      caller.send(queue, message, options, handler)
     }, raw)
   }
 
@@ -65,7 +66,7 @@ function MessageBusRpc (messageBusChannel, options) {
       }
     }
 
-    consumer(message, function (reply, raw) {
+    consumer(message, msg, function (reply, raw) {
       raw = raw || false
       var message = raw ? reply : new Buffer(JSON.stringify(reply))
       ch.sendToQueue(msg.properties.replyTo, message, { correlationId: msg.properties.correlationId })
@@ -90,7 +91,7 @@ function MessageBusRpc (messageBusChannel, options) {
       }
     }
 
-    tracker.handler(null, message)
+    tracker.handler(null, message, msg)
   }
 
   function doCall (attempt, callback, raw) {
@@ -139,9 +140,13 @@ function MessageBusRpc (messageBusChannel, options) {
       ch.consume(q.queue, self._replyConsumer, { noAck: true })
 
       // set the private queue as ready
-      self._privateQueue.send = function (queue, message, handler) {
-        const tracker = createTracker(handler, raw)
-        ch.sendToQueue(queue, message, { correlationId: tracker.id, replyTo: q.queue })
+      self._privateQueue.send = function (queue, message, opts, handler) {
+        const tracker = createTracker(handler, raw, opts.hasOwnProperty('correlationId') ? opts.correlationId : null)
+        opts.correlationId = tracker.id
+        if (!opts.hasOwnProperty('replyTo')) {
+          opts.replyTo = q.queue
+        }
+        ch.sendToQueue(queue, message, opts)
       }
       self._privateQueue.ready = true
       self._privateQueue.queue = q.queue
@@ -151,8 +156,8 @@ function MessageBusRpc (messageBusChannel, options) {
     })
   }
 
-  function createTracker (handler, raw) {
-    const id = uuid.v4()
+  function createTracker (handler, raw, id) {
+    id = id || uuid.v4()
     if (trackers[id]) {
       return createTracker()
     }

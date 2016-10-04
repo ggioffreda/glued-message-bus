@@ -252,7 +252,7 @@ describe('MessageBusRpc', function () {
         channel = ch
         rpc = channel.getRpc()
         consumer = sinon.stub()
-        consumer.callsArgWith(1, 'yo')
+        consumer.callsArgWith(2, 'yo')
         rpc.accept(queue, consumer)
         done()
       })
