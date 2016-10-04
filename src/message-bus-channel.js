@@ -79,7 +79,7 @@ function MessageBusChannel (messageBus, channel) {
             return
           }
         }
-        consumer(routingKey, message, function () {
+        consumer(routingKey, message, msg, function () {
           self._channel.ack(msg)
         })
       })
