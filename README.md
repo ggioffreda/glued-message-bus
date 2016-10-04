@@ -90,9 +90,10 @@ API
 
 ### MessageBusChannel
 
-- **publish**(key, message, raw): publishes a message to the topic identified by the
-  given key, if the last parameter is true than the message will be sent as is to
-  the bus;
+- **publish**(key, message, raw, options): publishes a message to the topic 
+  identified by the given key, if the third parameter is true than the message will 
+  be sent as is to the bus and you can specify custom options using the last
+  parameter;
 
 - **subscribe**(key, consumer, queue, raw, options): subscribes to the given topic 
   so that each message received on that topic will be passed to the given consumer. 
@@ -101,6 +102,7 @@ API
   consumer will receive three parameters when a message is received:
   - key: the topic identifier;
   - msg: the message received;
+  - rawMsg: the raw message, as it comes from the bus;
   - callback: a callback that must be called once done. This is really important
     to make sure messages don't get stuck;
 

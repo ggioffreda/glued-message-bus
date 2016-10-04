@@ -33,6 +33,7 @@ function MessageBusChannel (messageBus, channel) {
    * @param key
    * @param message
    * @param raw
+   * @param options
    */
   this.publish = function (key, message, raw, options) {
     message = raw ? message : new Buffer(JSON.stringify(message))
