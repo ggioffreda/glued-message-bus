@@ -191,7 +191,7 @@ describe('MessageBusChannel', function () {
   describe('#getRpc()', function () {
     it('should return a message bus RPC object', function () {
       assert.ok(channel.getRpc())
-      assert.ok(channel.getRpc().call)
+      assert.ok(channel.getRpc().request)
       assert.ok(channel.getRpc().accept)
     })
 
@@ -291,7 +291,7 @@ describe('MessageBusRpc', function () {
     })
   })
 
-  describe('#call()', function () {
+  describe('#request()', function () {
     var handler = sinon.stub()
 
     before(function (done) {
@@ -306,7 +306,7 @@ describe('MessageBusRpc', function () {
     })
 
     it('should create a new private channel', function () {
-      rpc.call(queue, 'test', handler)
+      rpc.request(queue, 'test', handler)
       assert.ok(context.amqpChannel.assertQueue.calledOnce)
       assert.equal(context.amqpChannel.assertQueue.lastCall.args[0], '')
       assert.deepEqual(context.amqpChannel.assertQueue.lastCall.args[1], { exclusive: true, durable: false })
@@ -314,18 +314,18 @@ describe('MessageBusRpc', function () {
 
     it('and use the same private channel for subsequent calls', function () {
       var privateQueue = rpc.getPrivateQueue()
-      rpc.call(queue, 'second test', handler)
+      rpc.request(queue, 'second test', handler)
       assert.strictEqual(rpc.getPrivateQueue(), privateQueue)
     })
 
     it('should set up a consumer for the responses', function () {
-      rpc.call(queue, 'third test', handler)
+      rpc.request(queue, 'third test', handler)
       assert.equal(context.amqpChannel.consume.lastCall.args[0], rpc.getPrivateQueue().queue)
       assert.deepEqual(context.amqpChannel.consume.lastCall.args[2], { noAck: true })
     })
 
     it('should send the message to the queue', function () {
-      rpc.call(queue, 'fourth test', handler)
+      rpc.request(queue, 'fourth test', handler)
       assert.equal(context.amqpChannel.sendToQueue.lastCall.args[0], queue)
       assert.equal(context.amqpChannel.sendToQueue.lastCall.args[1].toString(), '"fourth test"')
     })

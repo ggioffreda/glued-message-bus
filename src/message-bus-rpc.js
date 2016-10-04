@@ -22,7 +22,7 @@ function MessageBusRpc (messageBusChannel, options) {
     })
   }
 
-  this.call = function (queue, message, handler, raw) {
+  this.request = function (queue, message, handler, raw) {
     raw = raw || false
     doCall(1, function (err, caller) {
       if (err) {
