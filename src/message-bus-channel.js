@@ -34,14 +34,10 @@ function MessageBusChannel (messageBus, channel) {
    * @param message
    * @param raw
    */
-  this.publish = function (key, message, raw) {
-    raw = raw || false
-    this._channel.publish(
-      this._messageBus.getExchange(),
-      key,
-      raw ? message : new Buffer(JSON.stringify(message)),
-      raw ? {} : { persistent: true, content_type: 'application/json' }
-    )
+  this.publish = function (key, message, raw, options) {
+    message = raw ? message : new Buffer(JSON.stringify(message))
+    options = options || { persistent: true, content_type: 'application/json' }
+    this._channel.publish(this._messageBus.getExchange(), key, message, options)
   }
 
   /**
