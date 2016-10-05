@@ -129,13 +129,7 @@ function MessageBusRpc (messageBusChannel, options) {
 
     // try and initialise the private queue
     const ch = messageBusChannel.getChannel()
-    ch.assertQueue('', { exclusive: true, durable: false }, function (err, q) {
-      if (err) {
-        self._privateQueue = null
-        callback(err)
-        return
-      }
-
+    ch.assertQueue('', { exclusive: true, durable: false }).then(function (q) {
       // once the queue is created successfully, start consuming reply messages
       ch.consume(q.queue, self._replyConsumer, { noAck: true })
 
@@ -153,15 +147,17 @@ function MessageBusRpc (messageBusChannel, options) {
 
       // and finally return the private queue through the callback
       callback(null, self._privateQueue)
+    }, function (err) {
+      self._privateQueue = null
+      callback(err)
     })
   }
 
   function createTracker (handler, raw, id) {
     id = id || uuid.v4()
-    if (trackers[id]) {
-      return createTracker()
+    if (!trackers[id]) {
+      trackers[id] = { id: id, handler: handler, raw: raw }
     }
-    trackers[id] = { id: id, handler: handler, raw: raw }
     return trackers[id]
   }
 }
